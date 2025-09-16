@@ -435,11 +435,13 @@
                             <div class="info-basica">
                                 <h3>${colaborador.nombre} ${colaborador.apellidos}</h3>
                                 <p>${colaborador.cargo}${variableTexto}</p>
+                                <p>Teléfono: ${colaborador.telefono}</p>
                             </div>
                         </div>
                     `;
                     galeriaSeccion.insertAdjacentHTML('beforeend', tarjetaHTML);
                 });
+                galeriaSeccion.appendChild(document.createElement('br'));
                 galeriaColaboradores.appendChild(galeriaSeccion);
             }
         }
