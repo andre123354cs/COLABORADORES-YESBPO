@@ -474,11 +474,11 @@
     const modalNombre = document.getElementById('modal-nombre');
     const modalCargo = document.getElementById('modal-cargo');
     const modalTelefono = document.getElementById('modal-telefono');
+    const btnEditar = document.getElementById('btn-editar');
     
     // Elementos del formulario de edición en el modal
     const modalDetallesContent = document.getElementById('modal-detalles-content');
     const modalEdicionContent = document.getElementById('modal-edicion-content');
-    const btnEditar = document.getElementById('btn-editar');
     const formularioEdicion = document.getElementById('formulario-edicion');
     const editIdInput = document.getElementById('edit-id');
     const editNombreInput = document.getElementById('edit-nombre');
@@ -487,6 +487,9 @@
     const editCargoInput = document.getElementById('edit-cargo');
     const editFotoInput = document.getElementById('edit-foto');
     const mensajeExitoEdicion = document.getElementById('mensaje-exito-edicion');
+    
+    // Variable de estado de acceso de administrador
+    let isAdminLoggedIn = false;
 
     function mostrarModulo(moduloAMostrar) {
         document.querySelectorAll('.modulo').forEach(mod => mod.classList.remove('activo'));
@@ -593,6 +596,13 @@
                 editCargoInput.value = cargo;
                 editFotoInput.value = foto;
                 
+                // Muestra el botón de editar solo si el usuario ha iniciado sesión como administrador
+                if (isAdminLoggedIn) {
+                    btnEditar.style.display = 'block';
+                } else {
+                    btnEditar.style.display = 'none';
+                }
+
                 modalDetallesContent.style.display = 'flex';
                 modalEdicionContent.style.display = 'none';
                 modal.classList.add('visible');
@@ -647,8 +657,10 @@
     btnAdminAcceso.addEventListener('click', () => {
         const claveIngresada = prompt("Por favor, ingrese la clave de administración:");
         if (claveIngresada === CLAVE_ADMIN) {
+            isAdminLoggedIn = true;
             mostrarModulo(moduloRegistro);
-            alert("Acceso concedido. Ahora puede registrar colaboradores.");
+            btnAdminAcceso.style.display = 'none'; // Oculta el botón de acceso una vez que se ha iniciado sesión
+            alert("Acceso concedido. Ahora puede registrar y editar colaboradores.");
         } else if (claveIngresada !== null) {
             alert("Clave incorrecta. Acceso denegado.");
         }
