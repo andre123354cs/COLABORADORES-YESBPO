@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directorio de Colaboradores Yesbpo</title>
+    <style>
+        :root {
+            --fondo-claro: #f0f4f8;
+            --color-principal: #3a506b;
+            --color-acento: #007bff;
+            --sombra-suave: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--fondo-claro);
+            color: var(--color-principal);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .contenedor-principal {
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+        }
+
+        .navegacion {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: flex-end; /* Alinea el botón a la derecha */
+            gap: 20px;
+        }
+
+        .navegacion button {
+            background-color: transparent;
+            border: none;
+            color: var(--color-principal);
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 10px 20px;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .navegacion button::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background-color: var(--color-acento);
+            transition: width 0.3s ease, left 0.3s ease;
+        }
+
+        .navegacion button:hover::after,
+        .navegacion button.activo::after {
+            width: 100%;
+            left: 0;
+        }
+        
+        #btn-admin-acceso {
+            background-color: var(--color-acento);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        #btn-admin-acceso:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+
+        .modulo {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .modulo.activo {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: var(--color-principal);
+            font-size: 2.5em;
+            margin-bottom: 40px;
+        }
+
+        .contenedor-form {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: var(--sombra-suave);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .campo {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .campo label {
+            display: block;
+            font-size: 1em;
+            color: var(--color-principal);
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .campo input {
+            width: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+            background-color: var(--fondo-claro);
+            border: 1px solid #c0c0d0;
+            border-radius: 8px;
+            color: var(--color-principal);
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .campo input:focus {
+            outline: none;
+            border-color: var(--color-acento);
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+        }
+
+        .btn-enviar {
+            background-color: var(--color-acento);
+            color: #ffffff;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .btn-enviar:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px);
+        }
+        
+        #mensaje-exito {
+            color: green;
+            font-weight: bold;
+            margin-top: 15px;
+            display: none;
+        }
+
+        /* --- Módulo de Visualización (Galería) --- */
+        .galeria {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+        }
+
+        .tarjeta-colaborador {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: var(--sombra-suave);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+        }
+
+        .tarjeta-colaborador:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .avatar-contenedor {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--color-acento);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .avatar-contenedor img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-bottom: none;
+        }
+
+        .info-basica {
+            padding: 15px;
+            padding-top: 0;
+            width: 100%;
+        }
+
+        .info-basica h3 {
+            margin: 0;
+            font-size: 1.2em;
+            color: var(--color-acento);
+            text-transform: uppercase;
+        }
+
+        .info-basica p {
+            margin: 5px 0 0;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        /* --- Estilos para el Modal (vista detallada) --- */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(240, 244, 248, 0.9);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.visible {
+            display: flex;
+        }
+        
+        .perfil-detalles {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: left;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .modal.visible .perfil-detalles {
+            transform: scale(1);
+        }
+
+        .perfil-detalles img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--color-acento);
+        }
+
+        .info-detallada h2 {
+            color: var(--color-principal);
+            font-size: 2em;
+            margin: 0 0 10px 0;
+        }
+
+        .info-detallada p {
+            font-size: 1.1em;
+            margin: 8px 0;
+        }
+
+        .info-detallada p strong {
+            color: var(--color-acento);
+        }
+
+        .cerrar-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2em;
+            color: #6c757d;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .cerrar-modal:hover {
+            color: var(--color-acento);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="contenedor-principal">
+    <div class="navegacion">
+        <button id="btn-admin-acceso">Acceso de Administración</button>
+    </div>
+
+    <div id="modulo-registro" class="modulo">
+        <h1>Registrar Nuevo Colaborador</h1>
+        <div class="contenedor-form">
+            <form id="formulario-registro">
+                <div class="campo">
+                    <label for="nombre">Nombre Completo</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                <div class="campo">
+                    <label for="apellidos">Apellidos</label>
+                    <input type="text" id="apellidos" name="apellidos" required>
+                </div>
+                <div class="campo">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" name="telefono" required>
+                </div>
+                <div class="campo">
+                    <label for="cargo">Cargo</label>
+                    <input type="text" id="cargo" name="cargo" required>
+                </div>
+                <div class="campo">
+                    <label for="foto">URL de la Foto</label>
+                    <input type="url" id="foto" name="foto" placeholder="Ej: https://via.placeholder.com/150" required>
+                </div>
+                <button type="submit" class="btn-enviar">Registrar</button>
+                <p id="mensaje-exito">¡Colaborador registrado con éxito!</p>
+            </form>
+        </div>
+    </div>
+
+    <div id="modulo-visualizacion" class="modulo activo">
+        <h1>Directorio de Colaboradores Yesbpo</h1>
+        <div class="galeria" id="galeria-colaboradores">
+            </div>
+    </div>
+
+    <div id="modal-perfil" class="modal">
+        <div class="perfil-detalles">
+            <span class="cerrar-modal">&times;</span>
+            <img id="modal-foto" src="" alt="Foto de perfil">
+            <div class="info-detallada">
+                <h2 id="modal-nombre"></h2>
+                <p><strong>Cargo:</strong> <span id="modal-cargo"></span></p>
+                <p><strong>Teléfono:</strong> <span id="modal-telefono"></span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const btnAdminAcceso = document.getElementById('btn-admin-acceso');
+    const moduloRegistro = document.getElementById('modulo-registro');
+    const moduloVisualizacion = document.getElementById('modulo-visualizacion');
+    const formularioRegistro = document.getElementById('formulario-registro');
+    const galeriaColaboradores = document.getElementById('galeria-colaboradores');
+    const mensajeExito = document.getElementById('mensaje-exito');
+    const CLAVE_ADMIN = "1106742184";
+
+    const modal = document.getElementById('modal-perfil');
+    const cerrarModal = document.querySelector('.cerrar-modal');
+    const modalFoto = document.getElementById('modal-foto');
+    const modalNombre = document.getElementById('modal-nombre');
+    const modalCargo = document.getElementById('modal-cargo');
+    const modalTelefono = document.getElementById('modal-telefono');
+
+    function mostrarModulo(moduloAMostrar) {
+        document.querySelectorAll('.modulo').forEach(mod => mod.classList.remove('activo'));
+        moduloAMostrar.classList.add('activo');
+    }
+
+    // Funciones para manejar los datos
+    function guardarColaborador(colaborador) {
+        const colaboradores = JSON.parse(localStorage.getItem('colaboradores')) || [];
+        colaboradores.push(colaborador);
+        localStorage.setItem('colaboradores', JSON.stringify(colaboradores));
+    }
+
+    function obtenerColaboradores() {
+        return JSON.parse(localStorage.getItem('colaboradores')) || [];
+    }
+
+    function renderizarGaleria() {
+        galeriaColaboradores.innerHTML = '';
+        const colaboradores = obtenerColaboradores();
+        
+        colaboradores.forEach(colaborador => {
+            const tarjetaHTML = `
+                <div class="tarjeta-colaborador" 
+                    data-nombre="${colaborador.nombre} ${colaborador.apellidos}" 
+                    data-cargo="${colaborador.cargo}" 
+                    data-telefono="${colaborador.telefono}" 
+                    data-foto="${colaborador.foto}">
+                    <div class="avatar-contenedor">
+                        <img src="${colaborador.foto}" alt="${colaborador.nombre}">
+                    </div>
+                    <div class="info-basica">
+                        <h3>${colaborador.nombre} ${colaborador.apellidos}</h3>
+                        <p>${colaborador.cargo}</p>
+                    </div>
+                </div>
+            `;
+            galeriaColaboradores.insertAdjacentHTML('beforeend', tarjetaHTML);
+        });
+
+        document.querySelectorAll('.tarjeta-colaborador').forEach(tarjeta => {
+            tarjeta.addEventListener('click', () => {
+                const nombre = tarjeta.dataset.nombre;
+                const cargo = tarjeta.dataset.cargo;
+                const telefono = tarjeta.dataset.telefono;
+                const foto = tarjeta.dataset.foto;
+                
+                modalFoto.src = foto;
+                modalNombre.textContent = nombre;
+                modalCargo.textContent = cargo;
+                modalTelefono.textContent = telefono;
+                modal.classList.add('visible');
+            });
+        });
+    }
+
+    // Evento del formulario de registro
+    formularioRegistro.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(formularioRegistro);
+        const colaborador = Object.fromEntries(formData.entries());
+        
+        guardarColaborador(colaborador);
+        formularioRegistro.reset();
+        mensajeExito.style.display = 'block';
+        setTimeout(() => {
+            mensajeExito.style.display = 'none';
+            mostrarModulo(moduloVisualizacion);
+            renderizarGaleria(); 
+        }, 1500);
+    });
+
+    // Evento para el botón de acceso de administración
+    btnAdminAcceso.addEventListener('click', () => {
+        const claveIngresada = prompt("Por favor, ingrese la clave de administración:");
+        if (claveIngresada === CLAVE_ADMIN) {
+            mostrarModulo(moduloRegistro);
+            alert("Acceso concedido. Ahora puede registrar colaboradores.");
+        } else if (claveIngresada !== null) {
+            alert("Clave incorrecta. Acceso denegado.");
+        }
+    });
+
+    // Eventos del modal
+    cerrarModal.addEventListener('click', () => {
+        modal.classList.remove('visible');
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('visible');
+        }
+    });
+
+    // Cargar la galería al inicio
+    document.addEventListener('DOMContentLoaded', () => {
+        renderizarGaleria();
+    });
+</script>
+
+</body>
+</html>
