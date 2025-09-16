@@ -79,7 +79,6 @@
             transform: translateY(-2px);
         }
 
-
         .modulo {
             display: none;
             animation: fadeIn 0.5s ease-in-out;
@@ -183,7 +182,6 @@
             display: none;
         }
 
-        /* --- Módulo de Visualización (Galería) --- */
         .galeria {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -247,7 +245,6 @@
             font-size: 0.9em;
             color: #6c757d;
         }
-
     </style>
 </head>
 <body>
@@ -353,7 +350,28 @@
     </div>
 </div>
 
-<script>
+<script type="module">
+    // Importa las funciones necesarias de Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    // Reemplaza los valores de abajo con tu propia configuración de Firebase
+    // Puedes encontrar estos datos en la consola de Firebase, en 'Configuración del proyecto'
+    const firebaseConfig = {
+        apiKey: "AIzaSyCH3PhsnjWsO4T0AaKs-zRm2965CBgPZHo",
+        authDomain: "yesbpo-358d0.firebaseapp.com",
+        projectId: "yesbpo-358d0",
+        storageBucket: "yesbpo-358d0.firebasestorage.app",
+        messagingSenderId: "1008045294968",
+        appId: "1:1008045294968:web:2a3b0c7521ec7044bcb48d",
+        measurementId: "G-8SS4XJ746E"
+    };
+
+    // Inicializa Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const colaboradoresRef = collection(db, "colaboradores");
+
     const btnAdminAcceso = document.getElementById('btn-admin-acceso');
     const moduloRegistro = document.getElementById('modulo-registro');
     const moduloVisualizacion = document.getElementById('modulo-visualizacion');
@@ -370,7 +388,7 @@
     const editApellidosInput = document.getElementById('edit-apellidos');
     const editTelefonoInput = document.getElementById('edit-telefono');
     const editCargoInput = document.getElementById('edit-cargo');
-    const editVariableInput = document.getElementById('edit-variable'); // Nuevo campo de edición
+    const editVariableInput = document.getElementById('edit-variable');
     const editFotoInput = document.getElementById('edit-foto');
     const mensajeEdicionExito = document.getElementById('mensaje-edicion-exito');
 
@@ -378,34 +396,9 @@
         document.querySelectorAll('.modulo').forEach(mod => mod.classList.remove('activo'));
         moduloAMostrar.classList.add('activo');
     }
-    
-    function generarId() {
-        return '_' + Math.random().toString(36).substr(2, 9);
-    }
-    
-    function guardarColaborador(colaborador) {
-        const colaboradores = obtenerColaboradores();
-        colaborador.id = generarId();
-        colaboradores.push(colaborador);
-        localStorage.setItem('colaboradores', JSON.stringify(colaboradores));
-    }
-    
-    function actualizarColaborador(id, datosActualizados) {
-        let colaboradores = obtenerColaboradores();
-        const index = colaboradores.findIndex(c => c.id === id);
-        if (index !== -1) {
-            colaboradores[index] = { ...colaboradores[index], ...datosActualizados };
-            localStorage.setItem('colaboradores', JSON.stringify(colaboradores));
-        }
-    }
 
-    function obtenerColaboradores() {
-        return JSON.parse(localStorage.getItem('colaboradores')) || [];
-    }
-
-    function renderizarGaleria() {
+    function renderizarGaleria(colaboradores) {
         galeriaColaboradores.innerHTML = '';
-        const colaboradores = obtenerColaboradores();
         
         const cargos = {
             'CEO': [],
@@ -417,7 +410,7 @@
         };
         
         colaboradores.forEach(colaborador => {
-            if (cargos[colaborador.cargo]) {
+            if (colaborador.cargo && cargos[colaborador.cargo]) {
                 cargos[colaborador.cargo].push(colaborador);
             }
         });
@@ -452,40 +445,54 @@
         }
     }
 
-    function llenarDropdownColaboradores() {
-        const colaboradores = obtenerColaboradores();
+    function llenarDropdownColaboradores(colaboradores) {
         seleccionarColaborador.innerHTML = '<option value="">-- Seleccionar --</option>';
         colaboradores.forEach(colaborador => {
             const option = document.createElement('option');
             option.value = colaborador.id;
             option.textContent = `${colaborador.nombre} ${colaborador.apellidos}`;
+            // Guarda el objeto completo del colaborador en el elemento option
+            option.data = colaborador;
             seleccionarColaborador.appendChild(option);
         });
     }
 
+    // Escucha cambios en la base de datos en tiempo real
+    onSnapshot(colaboradoresRef, (querySnapshot) => {
+        const colaboradores = [];
+        querySnapshot.forEach((doc) => {
+            colaboradores.push({ id: doc.id, ...doc.data() });
+        });
+        renderizarGaleria(colaboradores);
+        llenarDropdownColaboradores(colaboradores);
+    });
+
     // Evento del formulario de registro
-    formularioRegistro.addEventListener('submit', (e) => {
+    formularioRegistro.addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(formularioRegistro);
         const colaborador = Object.fromEntries(formData.entries());
         
-        guardarColaborador(colaborador);
-        formularioRegistro.reset();
-        mensajeExito.style.display = 'block';
-        setTimeout(() => {
-            mensajeExito.style.display = 'none';
-            llenarDropdownColaboradores();
-            renderizarGaleria(); 
-        }, 1500);
+        try {
+            await addDoc(colaboradoresRef, colaborador);
+            formularioRegistro.reset();
+            mensajeExito.style.display = 'block';
+            setTimeout(() => {
+                mensajeExito.style.display = 'none';
+            }, 1500);
+        } catch (error) {
+            console.error("Error al agregar colaborador: ", error);
+            alert("Hubo un error al registrar. Por favor, inténtalo de nuevo.");
+        }
     });
 
     // Evento para el dropdown de selección de colaboradores
     seleccionarColaborador.addEventListener('change', (e) => {
         const idSeleccionado = e.target.value;
         if (idSeleccionado) {
-            const colaborador = obtenerColaboradores().find(c => c.id === idSeleccionado);
+            const colaborador = e.target.options[e.target.selectedIndex].data;
             if (colaborador) {
-                editIdInput.value = colaborador.id;
+                editIdInput.value = idSeleccionado;
                 editNombreInput.value = colaborador.nombre;
                 editApellidosInput.value = colaborador.apellidos;
                 editTelefonoInput.value = colaborador.telefono;
@@ -498,9 +505,9 @@
             formularioEdicion.style.display = 'none';
         }
     });
-
+    
     // Evento del formulario de edición
-    formularioEdicion.addEventListener('submit', (e) => {
+    formularioEdicion.addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = editIdInput.value;
         const datosActualizados = {
@@ -511,17 +518,21 @@
             variable: editVariableInput.value,
             foto: editFotoInput.value
         };
-        
-        actualizarColaborador(id, datosActualizados);
-        mensajeEdicionExito.style.display = 'block';
-        setTimeout(() => {
-            mensajeEdicionExito.style.display = 'none';
-            formularioEdicion.reset();
-            formularioEdicion.style.display = 'none';
-            seleccionarColaborador.value = '';
-            llenarDropdownColaboradores();
-            renderizarGaleria(); 
-        }, 1500);
+
+        try {
+            const docRef = doc(db, "colaboradores", id);
+            await updateDoc(docRef, datosActualizados);
+            mensajeEdicionExito.style.display = 'block';
+            setTimeout(() => {
+                mensajeEdicionExito.style.display = 'none';
+                formularioEdicion.reset();
+                formularioEdicion.style.display = 'none';
+                seleccionarColaborador.value = '';
+            }, 1500);
+        } catch (error) {
+            console.error("Error al actualizar colaborador: ", error);
+            alert("Hubo un error al actualizar. Por favor, inténtalo de nuevo.");
+        }
     });
 
     // Evento para el botón de acceso de administración
@@ -531,7 +542,6 @@
             mostrarModulo(moduloRegistro);
             btnAdminAcceso.style.display = 'none';
             contenedorEdicion.style.display = 'block';
-            llenarDropdownColaboradores();
             alert("Acceso concedido. Ahora puede registrar y editar colaboradores.");
         } else if (claveIngresada !== null) {
             alert("Clave incorrecta. Acceso denegado.");
@@ -540,7 +550,7 @@
 
     // Cargar la galería al inicio
     document.addEventListener('DOMContentLoaded', () => {
-        renderizarGaleria();
+        mostrarModulo(moduloVisualizacion);
     });
 </script>
 
