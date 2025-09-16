@@ -33,7 +33,7 @@
         .navegacion {
             margin-bottom: 30px;
             display: flex;
-            justify-content: flex-end; /* Alinea el botón a la derecha */
+            justify-content: flex-end;
             gap: 20px;
         }
 
@@ -100,7 +100,6 @@
             margin-bottom: 40px;
         }
         
-        /* Estilos para el nuevo encabezado de sección */
         .seccion-titulo {
             font-size: 1.8em;
             color: var(--color-acento);
@@ -217,7 +216,7 @@
             flex-direction: column;
             align-items: center;
             padding-top: 20px;
-            position: relative; /* Para posicionar el botón de edición */
+            position: relative;
         }
         
         .tarjeta-colaborador:hover {
@@ -264,7 +263,39 @@
             color: #6c757d;
         }
 
-        /* --- Estilos para el Modal (vista detallada) --- */
+        /* --- Estilos para el listado de administración --- */
+        #lista-administracion {
+            width: 100%;
+            margin-top: 40px;
+            border-collapse: collapse;
+        }
+
+        #lista-administracion th, #lista-administracion td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: left;
+        }
+
+        #lista-administracion th {
+            background-color: var(--color-acento);
+            color: white;
+        }
+
+        .btn-listado-editar {
+            background-color: #ffc107;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-listado-editar:hover {
+            background-color: #e0a800;
+        }
+
+        /* --- Estilos para el Modal (vista detallada/edición) --- */
         .modal {
             position: fixed;
             top: 0;
@@ -284,7 +315,7 @@
             display: flex;
         }
         
-        .perfil-detalles, .formulario-edicion {
+        .formulario-edicion {
             background-color: #ffffff;
             border-radius: 15px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
@@ -301,31 +332,8 @@
             flex-direction: column;
         }
 
-        .modal.visible .perfil-detalles, .modal.visible .formulario-edicion {
+        .modal.visible .formulario-edicion {
             transform: scale(1);
-        }
-
-        .perfil-detalles img {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid var(--color-acento);
-        }
-
-        .info-detallada h2 {
-            color: var(--color-principal);
-            font-size: 2em;
-            margin: 0 0 10px 0;
-        }
-
-        .info-detallada p {
-            font-size: 1.1em;
-            margin: 8px 0;
-        }
-
-        .info-detallada p strong {
-            color: var(--color-acento);
         }
 
         .cerrar-modal {
@@ -341,19 +349,6 @@
         .cerrar-modal:hover {
             color: var(--color-acento);
         }
-        
-        /* Estilos para el formulario de edición en el modal */
-        #modal-edicion {
-            display: none;
-        }
-        
-        .formulario-edicion {
-            display: none;
-        }
-        
-        .formulario-edicion.visible {
-            display: block;
-        }
 
     </style>
 </head>
@@ -365,8 +360,9 @@
     </div>
 
     <div id="modulo-registro" class="modulo">
-        <h1>Registrar Nuevo Colaborador</h1>
+        <h1>Registrar y Administrar Colaboradores</h1>
         <div class="contenedor-form">
+            <h2>Registrar Nuevo</h2>
             <form id="formulario-registro">
                 <div class="campo">
                     <label for="nombre">Nombre Completo</label>
@@ -400,27 +396,28 @@
                 <p id="mensaje-exito">¡Colaborador registrado con éxito!</p>
             </form>
         </div>
+        <h2 class="seccion-titulo">Editar Colaboradores Existentes</h2>
+        <table id="lista-administracion">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Cargo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
     </div>
 
     <div id="modulo-visualizacion" class="modulo activo">
         <h1>Directorio de Colaboradores Yesbpo</h1>
         <div id="galeria-colaboradores">
-            </div>
+        </div>
     </div>
 
-    <div id="modal-perfil" class="modal">
-        <div class="perfil-detalles" id="modal-detalles-content">
-            <span class="cerrar-modal">&times;</span>
-            <img id="modal-foto" src="" alt="Foto de perfil">
-            <div class="info-detallada">
-                <h2 id="modal-nombre"></h2>
-                <p><strong>Cargo:</strong> <span id="modal-cargo"></span></p>
-                <p><strong>Teléfono:</strong> <span id="modal-telefono"></span></p>
-                <button id="btn-editar" class="btn-editar-datos">Editar Datos</button>
-            </div>
-        </div>
-        
-        <div class="formulario-edicion" id="modal-edicion-content">
+    <div id="modal-edicion" class="modal">
+        <div class="formulario-edicion">
             <span class="cerrar-modal">&times;</span>
             <h2>Editar Colaborador</h2>
             <form id="formulario-edicion">
@@ -468,17 +465,8 @@
     const mensajeExito = document.getElementById('mensaje-exito');
     const CLAVE_ADMIN = "1106742184";
 
-    const modal = document.getElementById('modal-perfil');
-    const cerrarModal = document.querySelector('.cerrar-modal');
-    const modalFoto = document.getElementById('modal-foto');
-    const modalNombre = document.getElementById('modal-nombre');
-    const modalCargo = document.getElementById('modal-cargo');
-    const modalTelefono = document.getElementById('modal-telefono');
-    const btnEditar = document.getElementById('btn-editar');
-    
-    // Elementos del formulario de edición en el modal
-    const modalDetallesContent = document.getElementById('modal-detalles-content');
-    const modalEdicionContent = document.getElementById('modal-edicion-content');
+    const modalEdicion = document.getElementById('modal-edicion');
+    const cerrarModalEdicion = modalEdicion.querySelector('.cerrar-modal');
     const formularioEdicion = document.getElementById('formulario-edicion');
     const editIdInput = document.getElementById('edit-id');
     const editNombreInput = document.getElementById('edit-nombre');
@@ -488,15 +476,13 @@
     const editFotoInput = document.getElementById('edit-foto');
     const mensajeExitoEdicion = document.getElementById('mensaje-exito-edicion');
     
-    // Variable de estado de acceso de administrador
-    let isAdminLoggedIn = false;
+    const listaAdministracion = document.querySelector('#lista-administracion tbody');
 
     function mostrarModulo(moduloAMostrar) {
         document.querySelectorAll('.modulo').forEach(mod => mod.classList.remove('activo'));
         moduloAMostrar.classList.add('activo');
     }
     
-    // Funciones para manejar los datos
     function generarId() {
         return '_' + Math.random().toString(36).substr(2, 9);
     }
@@ -552,13 +538,7 @@
                 
                 cargos[cargo].forEach(colaborador => {
                     const tarjetaHTML = `
-                        <div class="tarjeta-colaborador" 
-                            data-id="${colaborador.id}"
-                            data-nombre="${colaborador.nombre}" 
-                            data-apellidos="${colaborador.apellidos}"
-                            data-cargo="${colaborador.cargo}" 
-                            data-telefono="${colaborador.telefono}" 
-                            data-foto="${colaborador.foto}">
+                        <div class="tarjeta-colaborador">
                             <div class="avatar-contenedor">
                                 <img src="${colaborador.foto}" alt="${colaborador.nombre}">
                             </div>
@@ -573,39 +553,44 @@
                 galeriaColaboradores.appendChild(galeriaSeccion);
             }
         }
-
-        document.querySelectorAll('.tarjeta-colaborador').forEach(tarjeta => {
-            tarjeta.addEventListener('click', () => {
-                const id = tarjeta.dataset.id;
-                const nombre = tarjeta.dataset.nombre;
-                const apellidos = tarjeta.dataset.apellidos;
-                const cargo = tarjeta.dataset.cargo;
-                const telefono = tarjeta.dataset.telefono;
-                const foto = tarjeta.dataset.foto;
+    }
+    
+    function renderizarListaAdministracion() {
+        listaAdministracion.innerHTML = '';
+        const colaboradores = obtenerColaboradores();
+        
+        colaboradores.forEach(colaborador => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${colaborador.nombre} ${colaborador.apellidos}</td>
+                <td>${colaborador.cargo}</td>
+                <td>
+                    <button class="btn-listado-editar" 
+                        data-id="${colaborador.id}"
+                        data-nombre="${colaborador.nombre}"
+                        data-apellidos="${colaborador.apellidos}"
+                        data-telefono="${colaborador.telefono}"
+                        data-cargo="${colaborador.cargo}"
+                        data-foto="${colaborador.foto}">
+                        Editar
+                    </button>
+                </td>
+            `;
+            listaAdministracion.appendChild(row);
+        });
+        
+        document.querySelectorAll('.btn-listado-editar').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const datos = e.target.dataset;
                 
-                modalFoto.src = foto;
-                modalNombre.textContent = `${nombre} ${apellidos}`;
-                modalCargo.textContent = cargo;
-                modalTelefono.textContent = telefono;
+                editIdInput.value = datos.id;
+                editNombreInput.value = datos.nombre;
+                editApellidosInput.value = datos.apellidos;
+                editTelefonoInput.value = datos.telefono;
+                editCargoInput.value = datos.cargo;
+                editFotoInput.value = datos.foto;
                 
-                // Pasa los datos al formulario de edición
-                editIdInput.value = id;
-                editNombreInput.value = nombre;
-                editApellidosInput.value = apellidos;
-                editTelefonoInput.value = telefono;
-                editCargoInput.value = cargo;
-                editFotoInput.value = foto;
-                
-                // Muestra el botón de editar solo si el usuario ha iniciado sesión como administrador
-                if (isAdminLoggedIn) {
-                    btnEditar.style.display = 'block';
-                } else {
-                    btnEditar.style.display = 'none';
-                }
-
-                modalDetallesContent.style.display = 'flex';
-                modalEdicionContent.style.display = 'none';
-                modal.classList.add('visible');
+                modalEdicion.classList.add('visible');
             });
         });
     }
@@ -621,15 +606,8 @@
         mensajeExito.style.display = 'block';
         setTimeout(() => {
             mensajeExito.style.display = 'none';
-            mostrarModulo(moduloVisualizacion);
-            renderizarGaleria(); 
+            renderizarListaAdministracion(); 
         }, 1500);
-    });
-    
-    // Evento para el botón de editar en el modal
-    btnEditar.addEventListener('click', () => {
-        modalDetallesContent.style.display = 'none';
-        modalEdicionContent.style.display = 'block';
     });
     
     // Evento del formulario de edición en el modal
@@ -648,8 +626,9 @@
         mensajeExitoEdicion.style.display = 'block';
         setTimeout(() => {
             mensajeExitoEdicion.style.display = 'none';
-            modal.classList.remove('visible');
-            renderizarGaleria();
+            modalEdicion.classList.remove('visible');
+            renderizarListaAdministracion();
+            renderizarGaleria(); // Para que los cambios se reflejen en la vista principal
         }, 1500);
     });
 
@@ -657,9 +636,9 @@
     btnAdminAcceso.addEventListener('click', () => {
         const claveIngresada = prompt("Por favor, ingrese la clave de administración:");
         if (claveIngresada === CLAVE_ADMIN) {
-            isAdminLoggedIn = true;
             mostrarModulo(moduloRegistro);
-            btnAdminAcceso.style.display = 'none'; // Oculta el botón de acceso una vez que se ha iniciado sesión
+            btnAdminAcceso.style.display = 'none';
+            renderizarListaAdministracion();
             alert("Acceso concedido. Ahora puede registrar y editar colaboradores.");
         } else if (claveIngresada !== null) {
             alert("Clave incorrecta. Acceso denegado.");
@@ -667,15 +646,13 @@
     });
 
     // Eventos del modal
-    document.querySelectorAll('.cerrar-modal').forEach(btn => {
-        btn.addEventListener('click', () => {
-            modal.classList.remove('visible');
-        });
+    cerrarModalEdicion.addEventListener('click', () => {
+        modalEdicion.classList.remove('visible');
     });
 
     window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.classList.remove('visible');
+        if (e.target === modalEdicion) {
+            modalEdicion.classList.remove('visible');
         }
     });
 
