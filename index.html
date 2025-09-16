@@ -181,10 +181,12 @@
             margin-top: 15px;
             display: none;
         }
-
+        
+        /* Ajuste para centrar las tarjetas */
         .galeria {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 25px;
         }
 
@@ -441,7 +443,6 @@
                     `;
                     galeriaSeccion.insertAdjacentHTML('beforeend', tarjetaHTML);
                 });
-                galeriaSeccion.appendChild(document.createElement('br'));
                 galeriaColaboradores.appendChild(galeriaSeccion);
             }
         }
